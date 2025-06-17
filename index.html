@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Oracle 8-Ball</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --backdrop: rgba(255, 255, 255, 0.02);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: 
+                radial-gradient(ellipse at top, #1e1b4b 0%, transparent 50%),
+                radial-gradient(ellipse at bottom, #312e81 0%, transparent 50%),
+                linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Liquid Background Animation */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 50%);
+            animation: liquidFlow 15s ease-in-out infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes liquidFlow {
+            0%, 100% { 
+                transform: translateX(0) translateY(0) scale(1);
+                filter: hue-rotate(0deg);
+            }
+            25% { 
+                transform: translateX(-20px) translateY(-30px) scale(1.1);
+                filter: hue-rotate(90deg);
+            }
+            50% { 
+                transform: translateX(20px) translateY(20px) scale(0.9);
+                filter: hue-rotate(180deg);
+            }
+            75% { 
+                transform: translateX(-10px) translateY(30px) scale(1.05);
+                filter: hue-rotate(270deg);
+            }
+        }
+
+        /* Floating Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, var(--accent), transparent);
+            border-radius: 50%;
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            background: var(--glass);
+            backdrop-filter: blur(24px) saturate(180%);
+            border-radius: 32px;
+            padding: 48px;
+            box-shadow: 
+                0 32px 64px rgba(0, 0, 0, 0.25),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 0 0 1px var(--glass-border);
+            max-width: 520px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            animation: shimmer 4s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        h1 {
+            background: linear-gradient(135deg, #a855f7, #3b82f6, #06b6d4, #10b981);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: clamp(2.5rem, 6vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 12px;
+            animation: gradientShift 8s ease-in-out infinite;
+            letter-spacing: -0.02em;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            margin-bottom: 40px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        /* Morphing 8-Ball */
+        .eight-ball-container {
+            perspective: 1200px;
+            margin: 40px auto;
+        }
+
+        .eight-ball {
+            width: clamp(200px, 30vw, 280px);
+            height: clamp(200px, 30vw, 280px);
+            background: 
+                radial-gradient(circle at 30% 30%, #374151, #111827),
+                conic-gradient(from 0deg, #1f2937, #374151, #1f2937);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.5),
+                inset 0 0 60px rgba(255, 255, 255, 0.05),
+                0 0 0 4px rgba(99, 102, 241, 0.2);
+            transform-style: preserve-3d;
+        }
+
+        .eight-ball::before {
+            content: '';
+            position: absolute;
+            top: 15%;
+            left: 25%;
+            width: 40%;
+            height: 40%;
+            background: radial-gradient(ellipse, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(8px);
+            transform: rotate(-15deg);
+        }
+
+        .eight-ball:hover {
+            transform: translateY(-15px) rotateX(15deg) rotateY(15deg) scale(1.05);
+            box-shadow: 
+                0 40px 80px rgba(0, 0, 0, 0.6),
+                inset 0 0 80px rgba(255, 255, 255, 0.1),
+                0 0 0 6px var(--primary),
+                0 0 40px var(--primary);
+        }
+
+        .eight-ball.shake {
+            animation: morphShake 1s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+        }
+
+        @keyframes morphShake {
+            0%, 100% { 
+                transform: translateX(0) rotateZ(0deg) scale(1);
+                border-radius: 50%;
+            }
+            10% { 
+                transform: translateX(-12px) rotateZ(-3deg) scale(1.02);
+                border-radius: 45% 55% 50% 50%;
+            }
+            20% { 
+                transform: translateX(12px) rotateZ(3deg) scale(0.98);
+                border-radius: 55% 45% 50% 50%;
+            }
+            30% { 
+                transform: translateX(-8px) rotateZ(-2deg) scale(1.01);
+                border-radius: 50% 50% 45% 55%;
+            }
+            40% { 
+                transform: translateX(8px) rotateZ(2deg) scale(0.99);
+                border-radius: 50% 50% 55% 45%;
+            }
+            50% { 
+                transform: translateX(-4px) rotateZ(-1deg) scale(1);
+                border-radius: 48% 52% 50% 50%;
+            }
+            60% { 
+                transform: translateX(4px) rotateZ(1deg) scale(1);
+                border-radius: 52% 48% 50% 50%;
+            }
+        }
+
+        .window {
+            width: clamp(80px, 12vw, 120px);
+            height: clamp(80px, 12vw, 120px);
+            background: 
+                radial-gradient(circle, #000814 0%, #001d3d 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 3px solid #374151;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .window::after {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 30%;
+            width: 25%;
+            height: 25%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 60%);
+            border-radius: 50%;
+            filter: blur(1px);
+        }
+
+        .number-8 {
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 900;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                filter: drop-shadow(0 0 10px var(--accent));
+                transform: scale(1);
+            }
+            50% { 
+                filter: drop-shadow(0 0 25px var(--primary));
+                transform: scale(1.05);
+            }
+        }
+
+        .input-group {
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: clamp(16px, 4vw, 20px) clamp(20px, 5vw, 28px);
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            border: none;
+            border-radius: 24px;
+            background: var(--backdrop);
+            backdrop-filter: blur(16px);
+            outline: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            color: white;
+            border: 2px solid transparent;
+            font-weight: 400;
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        input[type="text"]:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid var(--primary);
+            box-shadow: 
+                0 0 0 4px rgba(99, 102, 241, 0.1),
+                0 8px 32px rgba(99, 102, 241, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .settings-group {
+            margin: 24px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            background: var(--backdrop);
+            border-radius: 20px;
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+        }
+
+        .toggle {
+            position: relative;
+            width: 64px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 32px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .toggle.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: 1px solid var(--primary);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 26px;
+            height: 26px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle.active .toggle-slider {
+            transform: translateX(32px);
+            background: white;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .toggle-label {
+            color: white;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            font-weight: 500;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: clamp(12px, 3vw, 16px) clamp(24px, 6vw, 32px);
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            text-transform: none;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(16px);
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        .ask-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ask-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(99, 102, 241, 0.4);
+            background: linear-gradient(135deg, #7c3aed, #2563eb);
+        }
+
+        .speak-btn {
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            color: white;
+            box-shadow: 0 8px 32px rgba(6, 182, 212, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .speak-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(6, 182, 212, 0.4);
+            background: linear-gradient(135deg, #0891b2, #059669);
+        }
+
+        .speak-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .answer-container {
+            margin-top: 40px;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .question-display {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            margin-bottom: 20px;
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        .answer {
+            background: linear-gradient(135deg, var(--backdrop), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(24px);
+            color: white;
+            font-size: clamp(1.2rem, 4vw, 1.6rem);
+            font-weight: 600;
+            opacity: 0;
+            transform: translateY(40px) scale(0.8) rotateX(15deg);
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            padding: 24px;
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 
+                0 16px 48px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .answer.show {
+            opacity: 1;
+            transform: translateY(0) scale(1) rotateX(0deg);
+        }
+
+        .speaking-indicator {
+            color: var(--accent);
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            margin-top: 20px;
+            opacity: 0;
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .speaking-indicator.show {
+            opacity: 1;
+        }
+
+        .speaking-indicator::before {
+            content: '🎵';
+            animation: bounce 1.5s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-8px) scale(1.1); }
+        }
+
+        .history {
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .history h3 {
+            color: white;
+            margin-bottom: 24px;
+            text-align: center;
+            font-size: clamp(1.3rem, 3vw, 1.6rem);
+            font-weight: 600;
+        }
+
+        .history-item {
+            background: var(--backdrop);
+            backdrop-filter: blur(16px);
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            border-left: 4px solid var(--primary);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(8px);
+            border-left-color: var(--accent);
+        }
+
+        .history-question {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            margin-bottom: 8px;
+            font-weight: 400;
+        }
+
+        .history-answer {
+            color: white;
+            font-weight: 600;
+            font-size: clamp(1rem, 2.5vw, 1.1rem);
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+            
+            .container {
+                padding: 32px 24px;
+                border-radius: 24px;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            button {
+                width: 100%;
+            }
+            
+            .settings-group {
+                flex-direction: column;
+                gap: 16px;
+            }
+        }
+
+        /* Desktop Optimizations */
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 640px;
+                padding: 56px;
+            }
+            
+            .btn-group {
+                gap: 24px;
+            }
+        }
+
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .eight-ball:hover {
+                transform: none;
+            }
+            
+            .eight-ball:active {
+                transform: scale(0.95);
+            }
+            
+            button:hover {
+                transform: none;
+            }
+            
+            button:active {
+                transform: scale(0.95);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles"></div>
+    
+    <div class="container">
+        <h1>✨ Quantum Oracle</h1>
+        <p class="subtitle">Transcend reality and glimpse the infinite</p>
+        
+        <div class="eight-ball-container">
+            <div class="eight-ball" id="eightBall">
+                <div class="window">
+                    <div class="number-8">8</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <div class="input-wrapper">
+                <input type="text" id="questionInput" placeholder="What mysteries shall we unveil together?" maxlength="200">
+            </div>
+            
+            <div class="settings-group">
+                <div class="toggle-container">
+                    <span class="toggle-label">Auto Speak</span>
+                    <div class="toggle active" id="autoSpeakToggle">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button class="ask-btn" onclick="askQuestion()">🔮 Consult Oracle</button>
+                <button class="speak-btn" id="speakBtn" onclick="speakAnswer()" disabled>🎙️ Repeat Prophecy</button>
+            </div>
+        </div>
+        
+        <div class="answer-container">
+            <div class="question-display" id="questionDisplay"></div>
+            <div class="answer" id="answerDisplay"></div>
+            <div class="speaking-indicator" id="speakingIndicator">Oracle channels wisdom...</div>
+        </div>
+        
+        <div class="history" id="historyContainer" style="display: none;">
+            <h3>📜 Cosmic Records</h3>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <script>
+        const answers = [
+            "The quantum field resonates - Yes, absolutely certain!",
+            "Cosmic frequencies align - It is decidedly so.",
+            "The universe confirms - Without any doubt whatsoever.",
+            "Dimensional static interferes - Reply hazy, try again.",
+            "The oracle recalibrates - Ask again in a moment.",
+            "Temporal flux obscures vision - Better not tell you now.",
+            "Parallel realities suggest - My sources indicate no.",
+            "The cosmic web trembles - Outlook appears challenging.",
+            "Quantum uncertainty prevails - Very doubtful indeed.",
+            "Stellar alignments confirm - Yes, the path illuminates.",
+            "Probability waves converge - Most likely, seeker.",
+            "The void remains silent - Cannot predict at this time.",
+            "Entropy increases - Don't count on it happening.",
+            "The multiverse speaks - My reply is definitively no.",
+            "Reality bends in your favor - Absolutely, beyond question!",
+            "Constellation patterns reveal - The stars affirm yes.",
+            "Quantum entanglement unclear - Focus and ask again.",
+            "The cosmic lens focuses - As I perceive it, yes.",
+            "Universal constants support - You may rely on it completely.",
+            "The future crystallizes - Outlook is remarkably positive."
+        ];
+
+        let currentQuestion = "";
+        let currentAnswer = "";
+        let history = [];
+        let autoSpeakEnabled = true;
+        let voices = [];
+        let isCurrentlySpeaking = false;
+
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Initialize voices
+        function loadVoices() {
+            voices = speechSynthesis.getVoices();
+        }
+
+        speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+
+        // Toggle auto-speak functionality
+        document.getElementById('autoSpeakToggle').addEventListener('click', function() {
+            autoSpeakEnabled = !autoSpeakEnabled;
+            this.classList.toggle('active', autoSpeakEnabled);
+        });
+
+        // Enhanced Text-to-Speech functionality
+        function speakText(text, callback = null) {
+            if (!('speechSynthesis' in window)) {
+                console.log('Text-to-speech not supported');
+                if (callback) callback();
+                return;
+            }
+
+            speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            utterance.rate = 0.75;
+            utterance.pitch = 1.1;
+            utterance.volume = 0.9;
+            
+            const preferredVoices = voices.filter(voice => 
+                voice.lang.startsWith('en') && 
+                (voice.name.includes('Female') || 
+                 voice.name.includes('Samantha') || 
+                 voice.name.includes('Karen') ||
+                 voice.name.includes('Zira') ||
+                 voice.name.includes('Susan'))
+            );
+            
+            if (preferredVoices.length > 0) {
+                utterance.voice = preferredVoices[0];
+            } else if (voices.length > 0) {
+                const englishVoices = voices.filter(voice => voice.lang.startsWith('en'));
+                if (englishVoices.length > 0) {
+                    utterance.voice = englishVoices[0];
+                }
+            }
+
+            const speakingIndicator = document.getElementById('speakingIndicator');
+            speakingIndicator.classList.add('show');
+            isCurrentlySpeaking = true;
+
+            utterance.onstart = function() {
+                console.log('Quantum Oracle speaks...');
+            };
+
+            utterance.onend = function() {
+                console.log('Oracle transmission complete');
+                speakingIndicator.classList.remove('show');
+                isCurrentlySpeaking = false;
+                if (callback) callback();
+            };
+
+            utterance.onerror = function(event) {
+                console.error('Speech error:', event.error);
+                speakingIndicator.classList.remove('show');
+                isCurrentlySpeaking = false;
+                if (callback) callback();
+            };
+
+            speechSynthesis.speak(utterance);
+        }
+
+        function speakAnswer() {
+            if (currentAnswer && currentQuestion) {
+                const fullText = `Your inquiry: ${currentQuestion}. The Oracle reveals: ${currentAnswer}`;
+                speakText(fullText);
+            }
+        }
+
+        function askQuestion() {
+            const questionInput = document.getElementById('questionInput');
+            const question = questionInput.value.trim();
+            
+            if (!question) {
+                alert('The Quantum Oracle requires your question to access the cosmic database!');
+                return;
+            }
+            
+            currentQuestion = question;
+            
+            if (isCurrentlySpeaking) {
+                speechSynthesis.cancel();
+                document.getElementById('speakingIndicator').classList.remove('show');
+                isCurrentlySpeaking = false;
+            }
+            
+            const eightBall = document.getElementById('eightBall');
+            eightBall.classList.add('shake');
+            
+            const answerDisplay = document.getElementById('answerDisplay');
+            const questionDisplay = document.getElementById('questionDisplay');
+            answerDisplay.classList.remove('show');
+            
+            setTimeout(() => {
+                eightBall.classList.remove('shake');
+                
+                const randomIndex = Math.floor(Math.random() * answers.length);
+                currentAnswer = answers[randomIndex];
+                
+                questionDisplay.textContent = `"${question}"`;
+                answerDisplay.textContent = currentAnswer;
+                answerDisplay.classList.add('show');
+                
+                document.getElementById('speakBtn').disabled = false;
+                
+                addToHistory(question, currentAnswer);
+                questionInput.value = '';
+                
+                if (autoSpeakEnabled) {
+                    setTimeout(() => {
+                        speakText(currentAnswer);
+                    }, 1000);
+                }
+                
+            }, 1000);
+        }
+
+        function addToHistory(question, answer) {
+            history.unshift({ question, answer, timestamp: new Date() });
+            
+            if (history.length > 5) {
+                history = history.slice(0, 5);
+            }
+            
+            updateHistoryDisplay();
+        }
+
+        function updateHistoryDisplay() {
+            const historyContainer = document.getElementById('historyContainer');
+            const historyList = document.getElementById('historyList');
+            
+            if (history.length > 0) {
+                historyContainer.style.display = 'block';
+                historyList.innerHTML = history.map(item => `
+                    <div class="history-item">
+                        <div class="history-question">"${item.question}"</div>
+                        <div class="history-answer">${item.answer}</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('questionInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                askQuestion();
+            }
+        });
+
+        document.getElementById('eightBall').addEventListener('click', function() {
+            const questionInput = document.getElementById('questionInput');
+            if (questionInput.value.trim()) {
+                askQuestion();
+            } else {
+                questionInput.focus();
+            }
+        });
+
+        // Initialize
+        window.addEventListener('load', function() {
+            createParticles();
+            
+            if (speechSynthesis.getVoices().length === 0) {
+                speechSynthesis.addEventListener('voiceschanged', loadVoices);
+            }
+        });
+    </script>
+</body>
+</html>
