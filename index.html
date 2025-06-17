@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum Oracle 8-Ball</title>
+    <title>Magic 8-Ball</title>
     <style>
         :root {
             --primary: #6366f1;
@@ -26,7 +26,7 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: 
                 radial-gradient(ellipse at top, #1e1b4b 0%, transparent 50%),
                 radial-gradient(ellipse at bottom, #312e81 0%, transparent 50%),
@@ -644,8 +644,8 @@
     <div class="particles"></div>
     
     <div class="container">
-        <h1>✨ Quantum Oracle</h1>
-        <p class="subtitle">Transcend reality and glimpse the infinite</p>
+        <h1>✨ Magic 8-Ball</h1>
+        <p class="subtitle">Ask any question and discover your answer</p>
         
         <div class="eight-ball-container">
             <div class="eight-ball" id="eightBall">
@@ -657,7 +657,7 @@
         
         <div class="input-group">
             <div class="input-wrapper">
-                <input type="text" id="questionInput" placeholder="What mysteries shall we unveil together?" maxlength="200">
+                <input type="text" id="questionInput" placeholder="What would you like to know?" maxlength="200">
             </div>
             
             <div class="settings-group">
@@ -670,45 +670,45 @@
             </div>
             
             <div class="btn-group">
-                <button class="ask-btn" onclick="askQuestion()">🔮 Consult Oracle</button>
-                <button class="speak-btn" id="speakBtn" onclick="speakAnswer()" disabled>🎙️ Repeat Prophecy</button>
+                <button class="ask-btn" onclick="askQuestion()">🔮 Ask Question</button>
+                <button class="speak-btn" id="speakBtn" onclick="speakAnswer()" disabled>🎙️ Speak Answer</button>
             </div>
         </div>
         
         <div class="answer-container">
             <div class="question-display" id="questionDisplay"></div>
             <div class="answer" id="answerDisplay"></div>
-            <div class="speaking-indicator" id="speakingIndicator">Oracle channels wisdom...</div>
+            <div class="speaking-indicator" id="speakingIndicator">Speaking...</div>
         </div>
         
         <div class="history" id="historyContainer" style="display: none;">
-            <h3>📜 Cosmic Records</h3>
+            <h3>📜 Recent Questions</h3>
             <div id="historyList"></div>
         </div>
     </div>
 
     <script>
         const answers = [
-            "The quantum field resonates - Yes, absolutely certain!",
-            "Cosmic frequencies align - It is decidedly so.",
-            "The universe confirms - Without any doubt whatsoever.",
-            "Dimensional static interferes - Reply hazy, try again.",
-            "The oracle recalibrates - Ask again in a moment.",
-            "Temporal flux obscures vision - Better not tell you now.",
-            "Parallel realities suggest - My sources indicate no.",
-            "The cosmic web trembles - Outlook appears challenging.",
-            "Quantum uncertainty prevails - Very doubtful indeed.",
-            "Stellar alignments confirm - Yes, the path illuminates.",
-            "Probability waves converge - Most likely, seeker.",
-            "The void remains silent - Cannot predict at this time.",
-            "Entropy increases - Don't count on it happening.",
-            "The multiverse speaks - My reply is definitively no.",
-            "Reality bends in your favor - Absolutely, beyond question!",
-            "Constellation patterns reveal - The stars affirm yes.",
-            "Quantum entanglement unclear - Focus and ask again.",
-            "The cosmic lens focuses - As I perceive it, yes.",
-            "Universal constants support - You may rely on it completely.",
-            "The future crystallizes - Outlook is remarkably positive."
+            "It is certain.",
+            "It is decidedly so.",
+            "Without a doubt.",
+            "Yes - definitely.",
+            "You may rely on it.",
+            "As I see it, yes.",
+            "Most likely.",
+            "Outlook good.",
+            "Yes.",
+            "Signs point to yes.",
+            "Reply hazy, try again.",
+            "Ask again later.",
+            "Better not tell you now.",
+            "Cannot predict now.",
+            "Concentrate and ask again.",
+            "Don't count on it.",
+            "My reply is no.",
+            "My sources say no.",
+            "Outlook not so good.",
+            "Very doubtful."
         ];
 
         let currentQuestion = "";
@@ -784,11 +784,11 @@
             isCurrentlySpeaking = true;
 
             utterance.onstart = function() {
-                console.log('Quantum Oracle speaks...');
+                console.log('Speaking...');
             };
 
             utterance.onend = function() {
-                console.log('Oracle transmission complete');
+                console.log('Speech complete');
                 speakingIndicator.classList.remove('show');
                 isCurrentlySpeaking = false;
                 if (callback) callback();
@@ -805,9 +805,8 @@
         }
 
         function speakAnswer() {
-            if (currentAnswer && currentQuestion) {
-                const fullText = `Your inquiry: ${currentQuestion}. The Oracle reveals: ${currentAnswer}`;
-                speakText(fullText);
+            if (currentAnswer) {
+                speakText(currentAnswer);
             }
         }
 
@@ -816,7 +815,7 @@
             const question = questionInput.value.trim();
             
             if (!question) {
-                alert('The Quantum Oracle requires your question to access the cosmic database!');
+                alert('Please enter a question!');
                 return;
             }
             
